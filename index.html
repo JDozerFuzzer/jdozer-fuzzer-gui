@@ -1,0 +1,40 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html">
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>JDozerFuzzer</title>
+
+	<link rel="stylesheet" type="text/css" href="src/ext/resources/css/ext-all-access.css" />
+	<!--<link rel="stylesheet" type="text/css" href="public/css/layout-browser.css">-->
+	<script type="text/javascript" src="src/ext/bootstrap.js"></script>
+	<!--<script src="src/ext/ext-all-debug.js"></script>-->
+
+	<script type="text/javascript" src="src/ext/ext-lang-es.js"></script>
+	<script type="text/javascript" src="src/classpath.js"></script>
+
+	<script type="text/javascript">
+
+		Ext.require(['fuzzer.EventBroker', 'fuzzer.Layout']);
+
+		var eventBroker;
+		Ext.onReady(function () {
+			eventBroker = new EventBroker();
+			(new Layout()).build();
+		});
+		
+	</script>
+
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+	<!-- and it's easy to individually load additional languages -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/go.min.js"></script>
+
+
+</head>
+
+<body>
+</body>
+
+</html>
