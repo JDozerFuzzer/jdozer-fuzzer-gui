@@ -7,6 +7,7 @@ Ext.define('fuzzer.FuzzerSelect', {
     initComponent: function () {
         this._combobox = new Ext.form.ComboBox({
             fieldLabel: 'Select Fuzzer',
+            id: 'fuzzer-selector',
             store: this.store(),
             displayField: 'displayName',
             valueField: 'id',

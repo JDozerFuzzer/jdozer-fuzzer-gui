@@ -2,7 +2,6 @@
  * EventBroker
  */
 
-
 Ext.define('fuzzer.EventBroker', {
     alternateClassName: 'EventBroker',
     extend: 'Ext.util.Observable',

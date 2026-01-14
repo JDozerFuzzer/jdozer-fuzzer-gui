@@ -25,9 +25,18 @@ Ext.define(`fuzzer.FuzzerPanel`, {
             }],
             items: [{
                 region: 'north',
-                //layout: 'anchor',
-                //height: 150,
-                items: [new FuzzerDetails().build()]
+                layout: {
+                    type: 'column',
+                    columnWidth: 1 / 2
+                },
+                height: '100%',
+                defaults: {
+                    layout: 'anchor',
+                    defaults: {
+                        anchor: '100%'
+                    }
+                },
+                items: [new FuzzerDetails().build(), new EngineMetrics().build()]
             }, {
                 region: 'center',
                 layout: {
@@ -57,6 +66,7 @@ Ext.define(`fuzzer.FuzzerPanel`, {
         'fuzzer.StatusCodeGrid',
         'fuzzer.ResponseGrid',
         'fuzzer.FuzzerForm',
-        'fuzzer.FuzzerDetails'
+        'fuzzer.FuzzerDetails',
+        'fuzzer.EngineMetrics'
     ]
 });

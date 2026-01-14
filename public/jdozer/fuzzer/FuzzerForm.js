@@ -38,16 +38,7 @@ Ext.define('fuzzer.FuzzerForm', {
                 emptyText: 'select contract',
                 fieldLabel: 'Contract',
                 buttonText: 'Examine'
-            }
-                /**
-                {
-                    xtype: 'hiddenfield',
-                    name: 'owner',
-                    value: globalThis.CURRENT_USER_TMP
-    
-                }
-                */
-            ],
+            }],
             buttons: [
                 {
                     text: 'Cancel',
@@ -82,7 +73,7 @@ Ext.define('fuzzer.FuzzerForm', {
                                     let resPayload = Ext.decode(res.responseText);
                                     Ext.MessageBox.show({
                                         title: 'Send error',
-                                        msg: `${resPayload.message.join('<br />')}`,
+                                        msg: `${resPayload.message}`,
                                         buttons: Ext.MessageBox.OK,
                                         icon: 'x-message-box-error'
                                     });
@@ -94,7 +85,6 @@ Ext.define('fuzzer.FuzzerForm', {
                     scope: this
                 }]
         });
-
         return this._form;
     },
 
@@ -116,7 +106,6 @@ Ext.define('fuzzer.FuzzerForm', {
                 }
             }
         });
-        XXX = formData;
         return formData;
     },
 
@@ -131,7 +120,6 @@ Ext.define('fuzzer.FuzzerForm', {
             border: 0,
             items: [this._formContainer()]
         });
-
         this._window.show();
     },
 

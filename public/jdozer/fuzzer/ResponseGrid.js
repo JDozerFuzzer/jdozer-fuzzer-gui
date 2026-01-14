@@ -14,32 +14,29 @@ Ext.define('fuzzer.ResponseGrid', {
                 stripeRows: true
             },
             columns: [{
-                text: 'Response',
+                text: 'Duration',
                 xtype: 'templatecolumn',
-                tpl: `{payload}`,
-                flex: 1
+                tpl: `{totalTime}ms`,
+                width: 100
             }, {
-                text: 'Response Error',
-                xtype: 'templatecolumn',
-                tpl: `{payloadErrors}`,
-                width: 240
-            }, {
-                text: 'Response Valid',
-                xtype: 'templatecolumn',
-                tpl: `{payloadValid}`,
+                text: 'Request',
+                width: 190,
                 renderer: function (value, meta, record, index) {
-                    console.debug(value, meta);
-                    console.debug(record, index);
-                    if (record.data.payloadValid) {
-                        this.items
+                    if (record.data.reqIsValid) {
+                        return `<span style="color: #00FF55;">Valid request sender</span>`;
                     }
-                    return record.data.payloadValid;
+                    return `<span style="color: #FF5500;">Invalid request sender</span>`;
                 }
             }, {
-                text: 'Time',
-                xtype: 'templatecolumn',
-                tpl: '{time}',
-                width: 170
+                text: 'Response',
+                width: 280,
+                flex: 1,
+                renderer: function (value, meta, record, index) {
+                    if (record.data.payloadIsValid) {
+                        return `<span style="color: #00FF55;">Valid response receiver</span>`;
+                    }
+                    return `<span style="color: #FF5500;">Invalid response receiver:<br />${record.data.payloadErrorMessage}</span>`;
+                }
             }],
             store: this.store(),
             listeners: {
@@ -57,41 +54,41 @@ Ext.define('fuzzer.ResponseGrid', {
             autoDestroy: true,
             autoLoad: false,
             fields: [{
-                name: 'operation',
+                name: 'id',
                 type: 'string',
-                mapping: 'operation'
-            }, {
-                name: 'method',
-                type: 'string',
-                mapping: 'method'
-            }, {
-                name: 'payload',
-                type: 'string',
-                mapping: 'payload'
-            }, {
-                name: 'time',
-                type: 'string',
-                mapping: 'time'
-            }, {
-                name: 'fuzzingId',
-                type: 'string',
-                mapping: 'fuzzingId'
-            }, {
-                name: 'requestId',
-                type: 'string',
-                mapping: 'requestId'
+                mapping: 'id'
             }, {
                 name: 'statusCode',
                 type: 'number',
                 mapping: 'statusCode'
             }, {
-                name: 'payloadValid',
-                type: 'boolean',
-                mapping: 'payloadValid'
-            }, {
-                name: 'payloadErrors',
+                name: 'method',
                 type: 'string',
-                mapping: 'payloadErrors'
+                mapping: 'method'
+            }, {
+                name: 'statusMessage',
+                type: 'string',
+                mapping: 'statusMessage'
+            }, {
+                name: 'totalTime',
+                type: 'number',
+                mapping: 'totalTime'
+            }, {
+                name: 'reqIsValid',
+                type: 'boolean',
+                mapping: 'reqIsValid'
+            }, {
+                name: 'payloadIsValid',
+                type: 'boolean',
+                mapping: 'payloadIsValid'
+            }, {
+                name: 'payloadErrorMessage',
+                type: 'string',
+                mapping: 'payloadErrorMessage'
+            }, {
+                name: 'statusCodeIsValid',
+                type: 'boolean',
+                mapping: 'statusCodeIsValid'
             }],
             proxy: {
                 type: 'ajax',
@@ -110,18 +107,19 @@ Ext.define('fuzzer.ResponseGrid', {
     },
     pubSelected: function (data) {
         eventBroker.fireEvent('selectedResponse', data);
-        (new FuzzingDetail()).initComponent(data.requestId);
+        (new FuzzingDetail()).initComponent(data.id);
     },
     subs: function () {
         eventBroker.addListener('selectedStatusCode', this.statusCodeSelected, this);
         eventBroker.addListener('selectedFuzzerId', () => { this._store.removeAll() }, this);
     },
     statusCodeSelected: function (data) {
-        this._store.proxy.url = this._getUrl(data.fuzzerId, data.operation, data.statusCode);
+        this._store.proxy.url = this._getUrl(data.fuzzerId, data.operation, data.method, data.statusCode);
         this._store.reload();
     },
-    _getUrl: function (fuzzerId, operation, statusCode) {
-        return `/bff/fuzzer/${fuzzerId}/${operation}/${statusCode}`;
+    _getUrl: function (fuzzerId, operation, method, statusCode) {
+        const fuzzerIdX = fuzzer.Fuzzer.getId();
+        return `/jdozer-fuzzer/bff/fuzzer/${fuzzerIdX}/${operation}/${method}/responses/${statusCode}`;
     },
     requires: ['fuzzer.FuzzingDetail']
 });

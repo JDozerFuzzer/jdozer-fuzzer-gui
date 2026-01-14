@@ -7,6 +7,9 @@ import * as FormData from 'form-data';
 import { Readable } from 'stream';
 import { BffException } from './bff.exception';
 
+/**
+ * @deprecated
+ */
 @Injectable()
 export class BffService {
 
@@ -33,8 +36,8 @@ export class BffService {
         return resp.data;
     }
 
-    async getFuzzingDetails(requestId: UUID) {
-        const resp = await firstValueFrom(this.httpService.get(`${process.env.FUZZER_BACKEND_URL}/fuzzing/request/${requestId}`));
+    async getFuzzingDetails(fuzzerId: UUID, requestId: UUID) {
+        const resp = await firstValueFrom(this.httpService.get(`${process.env.FUZZER_BACKEND_URL}/fuzzer/${fuzzerId}/request/${requestId}/details`));
         return resp.data;
     }
 
@@ -43,8 +46,9 @@ export class BffService {
         const formData = new FormData();
         formData.append('name', createFuzzerDto.name);
         formData.append('version', createFuzzerDto.version);
-        //formData.append('owner', createFuzzerDto.owner);
         formData.append('contract', Readable.from(file.buffer), { filename: file.originalname });
+
+        this.log.verbose(`Endpoint: ${process.env.FUZZER_SEEDER_HOST}, Port: ${process.env.FUZZER_SEEDER_PORT}`);
 
         return await firstValueFrom(this.httpService.post(`http://${process.env.FUZZER_SEEDER_HOST}:${process.env.FUZZER_SEEDER_PORT}/fuzzer`, formData, {
             headers: {
@@ -63,6 +67,7 @@ export class BffService {
         });
     }
 
+    /**
     private async startHacking(fuzzerId: UUID) {
         await firstValueFrom(this.httpService.post(`${process.env.FUZZER_HACKING_URL}/jdozer-fuzzer/hacking/${fuzzerId}`))
             .catch(error => new Error(`Failed to start fuzzer hacking: ${error.message}`));
@@ -72,5 +77,6 @@ export class BffService {
         await firstValueFrom(this.httpService.post(`${process.env.FUZZER_ENGINE_URL}/jdozer/fuzzer/engine/${fuzzerId}/${owner}`))
             .catch(error => new Error(`Failed to start fuzzer engine: ${error.message}`));
     }
+    */
 
 }

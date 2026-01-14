@@ -35,12 +35,12 @@ Ext.define('fuzzer.StatusCodeGrid', {
                 renderer: this.statusColor
             }],
             store: this.store(),
-            listeners:{
+            listeners: {
                 select: function (row) {
                     this.pubSelected(row.selected.items[0].data);
                 },
                 scope: this
-            } 
+            }
         });
 
         return this._grid;
@@ -90,7 +90,7 @@ Ext.define('fuzzer.StatusCodeGrid', {
         return this._store;
 
     },
-    pubSelected: function(rowData) {
+    pubSelected: function (rowData) {
         eventBroker.fireEvent('selectedStatusCode', rowData);
     },
     subs: function () {

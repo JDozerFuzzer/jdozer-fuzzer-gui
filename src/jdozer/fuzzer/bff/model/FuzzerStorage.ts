@@ -68,7 +68,26 @@ export class FuzzerStorage {
                     }
                 });
             }
-        } catch(e) {}
+        } catch (e) { }
+    }
+
+    async getDetails(fuzzerId: UUID): Promise<any> {
+        try {
+            const fuzzer: any = await this.redisService.get(this.keyManager.forFuzz(fuzzerId));
+            return {
+                id: fuzzer.id,
+                name: fuzzer.name,
+                version: fuzzer.version,
+                /**
+                 * @todo Update fuzzer tag server
+                 */
+                server: fuzzer.servers[0]
+            };
+        } catch (e) {
+            const err = `An error occurred while retrieving the fuzzing data.`;
+            this.log.error(err, e.message);
+            throw new Error(err);
+        }
     }
 
     async getFzzKeys(fuzzerId: UUID): Promise<string[]> {
@@ -77,6 +96,17 @@ export class FuzzerStorage {
             return fzzKeys;
         } catch (e) {
             const err = `An error occurred while trying to obtain the test keys for the fuzzer: ${fuzzerId}`;
+            this.log.error(err, e.message);
+            throw e;
+        }
+    }
+
+    async getEngineMetrics(fuzzerId: UUID): Promise<any> {
+        try {
+            const metrics = await this.redisService.get(this.keyManager.forFuzz(fuzzerId).concat(`:EME`));
+            return metrics;
+        } catch(e) {
+            const err: string = `An error occurred while trying to obtain engine metrics.`;
             this.log.error(err, e.message);
             throw e;
         }

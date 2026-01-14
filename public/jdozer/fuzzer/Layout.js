@@ -10,7 +10,7 @@ Ext.define(`fuzzer.Layout`, {
             layout: {
                 type: 'anchor'
             },
-            height: '100%',
+            //height: '100%',
             border: 0,
             bodyStyle: {
                 background: '#292929'
@@ -26,7 +26,10 @@ Ext.define(`fuzzer.Layout`, {
             ],
             renderTo: Ext.getBody()
         });
+
+        const ws = new WebSocketClient();
+
         return this;
     },
-    requires: ['fuzzer.FuzzerPanel']
+    requires: ['fuzzer.FuzzerPanel', 'fuzzer.socket.WebSocketClient', 'fuzzer.Fuzzer']
 });
