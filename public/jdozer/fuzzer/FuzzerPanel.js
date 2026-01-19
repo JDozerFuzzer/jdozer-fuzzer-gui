@@ -3,11 +3,8 @@
 Ext.define(`fuzzer.FuzzerPanel`, {
     alternateClassName: 'FuzzerPanel',
     build: function () {
-        this.fuzzerPanel = new Ext.panel.Panel({
-            layout: {
-                type: 'anchor'
-            },
-            height: '100%',
+        this.fuzzerPanel = new Ext.Panel({
+            layout: 'anchor',
             title: 'Fuzzers',
             border: 0,
             dockedItems: [{
@@ -15,7 +12,7 @@ Ext.define(`fuzzer.FuzzerPanel`, {
                 dock: 'top',
                 items: [
                     (new FuzzerSelect()).initComponent(),
-                    '|',
+                    '-',
                     (new FuzzerForm()).formButton()
                 ]
             }, {
@@ -24,28 +21,21 @@ Ext.define(`fuzzer.FuzzerPanel`, {
                 items: ['All rights reserved JDozer - Powered by Cristían Sáez V.']
             }],
             items: [{
-                region: 'north',
-                layout: {
-                    type: 'column',
-                    columnWidth: 1 / 2
-                },
-                height: '100%',
+                //height: '100%',
                 defaults: {
-                    layout: 'anchor',
                     defaults: {
-                        anchor: '100%'
+                        //anchor: '100%'
                     }
                 },
                 items: [new FuzzerDetails().build(), new EngineMetrics().build()]
             }, {
-                region: 'center',
                 layout: {
-                    type: 'column',
-                    columnWidth: 1 / 2
+                    type: 'column'
                 },
                 height: '100%',
                 defaults: {
-                    layout: 'anchor',
+                    //layout: 'anchor',
+                    columnWidth: 1 / 2,
                     defaults: {
                         anchor: '100%'
                     },
