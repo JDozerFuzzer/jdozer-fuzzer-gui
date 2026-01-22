@@ -63,6 +63,7 @@ Ext.define('fuzzer.FuzzerForm', {
                                 success: function (res) {
                                     if (res.status === 202) {
                                         this._window.close();
+                                        new FuzzerRunning().listener();
                                         Ext.Msg.alert('Success', 'Fuzzer created successfully');
                                     } else {
                                         console.warn('Unexpected status code', res.status);
@@ -122,5 +123,7 @@ Ext.define('fuzzer.FuzzerForm', {
         });
         this._window.show();
     },
-
+    requires: [
+        'fuzzer.FuzzerRunning'
+    ]
 });
