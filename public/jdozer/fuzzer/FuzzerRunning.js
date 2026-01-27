@@ -14,85 +14,107 @@ Ext.define('fuzzer.FuzzerRunning', {
     },
     _buildBar: function () {
         this._bar = new Ext.Window({
-            border: 0,
+            //border: 0,
             //constrain: true,
             title: 'Fuzzer Running...',
-            closable: false,
+            closable: true,
             layout: 'hbox',
-            draggable: false,
-            resizable: false,
-            frame: false,
+            draggable: true,
+            resizable: true,
+            frame: true,
             width: 700,
-            height: 100,
+            //height: 400,
             x: 1000,
             y: 30,
             //headerPosition: 'left',
-            defaults: {
-                padding: '2 10 2 0',
-                style: {
-                    fontWeight: 'bold'
-                }
-            },
-            items: [{
-                xtype: 'tbtext',
-                text: 'Status Code Counts:',
-                id: 'fuzzer-status-code-count'
-            }, {
-                xtype: 'tbtext',
-                text: '500:',
-                id: 'fuzzer-status-500'
-            }, {
-                xtype: 'tbtext',
-                text: '1250',
-                id: 'fuzzer-status-500-count',
-                padding: '2 0 2 0',
-                style: {
-                    fontWeight: 'italic'
-                }
-            }, {
-                xtype: 'tbtext',
-                text: '400:',
-                id: 'fuzzer-status-400'
-            }, {
-                xtype: 'tbtext',
-                text: '1250',
-                id: 'fuzzer-status-400-count',
-                padding: '2 0 2 0',
-                style: {
-                    fontWeight: 'italic'
-                }
-            }, {
-                xtype: 'tbtext',
-                text: '200:',
-                id: 'fuzzer-status-200'
-            }, {
-                xtype: 'tbtext',
-                text: '1250',
-                id: 'fuzzer-status-200-count',
-                padding: '2 0 2 0',
-                style: {
-                    fontWeight: 'italic'
-                }
-            }, {
-                xtype: 'tbtext',
-                text: '100:',
-                id: 'fuzzer-status-100'
-            }, {
-                xtype: 'tbtext',
-                text: '1250',
-                id: 'fuzzer-status-100-count',
-                padding: '2 0 2 0',
-                style: {
-                    fontWeight: 'italic'
-                }
-            }]
+            items: [this._buildStatusCodeCountGrid()]
         });
         return this._bar;
     },
-    _5XXCount: 0,
-    _4XXCount: 0,
-    _2XXCount: 0,
-    _1XXCount: 0,
+    _buildStatusCodeCountGrid: function () {
+        this._statusCodeCountGrid = new Ext.grid.Panel({
+            //title: 'Status Code Count',
+            id: 'running-status-code-count-grid',
+            height: 220,
+            border: 0,
+            columns: [{
+                text: 'Status Code',
+                dataIndex: 'statusCode',
+                width: 100,
+                align: 'center',
+                renderer: function (value) {
+                    var color;
+                    if (value >= 200 && value < 300)
+                        color = '#4CAF50';
+                    else if (value >= 300 && value < 400)
+                        color = '#FFC107';
+                    else if (value >= 400 && value < 500)
+                        color = '#FF9800';
+                    else if (value >= 500)
+                        color = '#F44336';
+                    else
+                        color = '#757575';
+                    return `<span style="color: ${color}; font-weight: bold;">${value}</span>`;
+                }
+            }, {
+                text: 'Count',
+                dataIndex: 'count',
+                width: 100,
+                align: 'center',
+                renderer: function (value) {
+                    return `<span style="font-weight: bold;">${value}</span>`;
+                }
+            }, {
+                text: 'Percentage',
+                dataIndex: 'percentage',
+                width: 100,
+                align: 'center',
+                renderer: function (value, meta, record) {
+                    var total = 0;
+                    this.store.each(function (record) {
+                        total += record.get('count');
+                    });
+
+                    if (total === 0) return '0%';
+
+                    var percentage = (record.get('count') / total * 100).toFixed(2);
+                    return `<span style="color: #2196F3;">${percentage}%</span>`;
+                }
+            }],
+            store: this._buildStatusCodeCountStore(),
+            viewConfig: {
+                stripeRows: true,
+                enableTextSelection: true
+            }
+        });
+
+        return this._statusCodeCountGrid;
+
+    },
+    _buildStatusCodeCountStore: function () {
+        this._statusCodeCountStore = new Ext.data.Store({
+            fields: ['statusCode', 'count'],
+            sorters: [{
+                property: 'statusCode',
+                direction: 'ASC'
+            }],
+            addOrUpdateStatusCode: function (statusCode) {
+                var existingRecord = this.findRecord('statusCode', statusCode);
+                if (existingRecord) {
+                    var currentCount = existingRecord.get('count') || 0;
+                    existingRecord.set('count', currentCount + 1);
+                } else {
+                    this.add({
+                        statusCode: statusCode,
+                        count: 1
+                    });
+                }
+                this.sort('count', 'DESC');
+            }
+        })
+
+        return this._statusCodeCountStore;
+    },
     _subs: function () {
         this.build();
         this._bar.show();
@@ -102,14 +124,13 @@ Ext.define('fuzzer.FuzzerRunning', {
         this._statusCodeCounter(payload);
     },
     _statusCodeCounter: function (data) {
-        if (data.statusCode === 500)
-            this._bar.getComponent('fuzzer-status-500-count').setText(this._5XXCount++);
-        if (data.statusCode === 400)
-            this._bar.getComponent('fuzzer-status-400-count').setText(this._4XXCount++);
-        if (data.statusCode === 200)
-            this._bar.getComponent('fuzzer-status-200-count').setText(this._2XXCount++);
-        if (data.statusCode === 100)
-            this._bar.getComponent('fuzzer-status-100-count').setText(this._1XXCount++);
+        this.addStatusCode(data.statusCode);
+    },
+    addStatusCode: function (statusCode) {
+        var statusCodeInt = parseInt(statusCode);
+        if (statusCodeInt && !isNaN(statusCodeInt)) {
+            this._statusCodeCountStore.addOrUpdateStatusCode(statusCodeInt);
+        }
     }
 });
 

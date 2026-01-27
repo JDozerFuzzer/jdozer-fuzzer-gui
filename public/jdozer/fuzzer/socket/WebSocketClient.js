@@ -20,7 +20,7 @@ Ext.define('fuzzer.socket.WebSocketClient', {
         });
 
         this.socket.on('message', (data) => {
-            console.log('📩 Mensaje:', data);
+            //console.log('📩 Mensaje:', data);
             this.router.inbound(data);
         });
 

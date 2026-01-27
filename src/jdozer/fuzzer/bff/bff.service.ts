@@ -1,11 +1,12 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { UUID } from 'crypto';
 import { firstValueFrom } from 'rxjs';
 import { CreateFuzzerDto } from './dto/create-fuzzer.dto';
 import * as FormData from 'form-data';
 import { Readable } from 'stream';
 import { BffException } from './bff.exception';
+import { AxiosError } from 'axios';
 
 /**
  * @deprecated
@@ -57,13 +58,12 @@ export class BffService {
         })).then(respCore => {
             this.log.verbose('Fuzzer created successfully, starting engine and hacking processes');
             return respCore.data;
-        }).catch((error) => {
-            const err = `An error occurred while trying to create the fuzzer: ${error.message}`;
-            this.log.error(err, error.stack);
+        }).catch((error: AxiosError) => {
+            this.log.error(error.message, error.stack);
             throw new BffException({
-                message: err,
-                cause: error.stack
-            }, 500);
+                message: error.response.data ? (error.response.data as any).message : error.message,
+                cause: error.response.data.toString()
+            }, error.response.status || 500);
         });
     }
 

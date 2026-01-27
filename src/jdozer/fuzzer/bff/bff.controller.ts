@@ -11,6 +11,7 @@ import { Vectors } from './model/Vectors';
 import { Mutations } from './model/Mutations';
 import { Operations } from './model/Operations';
 import { Fuzz } from './model/Fuzz';
+import { BffException } from './bff.exception';
 
 @Controller('/jdozer-fuzzer/bff')
 export class BffController {
@@ -132,6 +133,9 @@ export class BffController {
       const resp: any = await this.bffService.createFuzzer(createFuzzerDto, file);
       return res.status(HttpStatus.ACCEPTED).json(resp);
     } catch (e) {
+      if (e instanceof BffException) {
+        return res.status(e.getStatus()).json({ message: e.message });
+      }
       const err: string = `An error occurred while trying to create the fuzzer.`;
       this.log.error(err, e.message);
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: err });
