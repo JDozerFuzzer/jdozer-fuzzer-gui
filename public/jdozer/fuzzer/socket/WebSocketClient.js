@@ -24,6 +24,15 @@ Ext.define('fuzzer.socket.WebSocketClient', {
             this.router.inbound(data);
         });
 
+        this.socket.on('fuzzer.running', (data) => {
+            console.log('📩 Evento de running:', data);
+            try {
+                this.router.inbound(JSON.parse(data));
+            } catch (e) {
+                console.error('Internal error:', e);
+            }
+        });
+
         this.socket.on('disconnect', () => {
             console.log('🔌 Desconectado');
         });

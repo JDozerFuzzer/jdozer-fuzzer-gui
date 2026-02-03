@@ -27,7 +27,7 @@ Ext.define('fuzzer.FuzzerRunning', {
             x: 1000,
             y: 30,
             //headerPosition: 'left',
-            items: [this._buildStatusCodeCountGrid()]
+            items: [this._buildStatusCodeCountGrid(), this._buildTaggingGrid()]
         });
         return this._bar;
     },
@@ -95,8 +95,8 @@ Ext.define('fuzzer.FuzzerRunning', {
         this._statusCodeCountStore = new Ext.data.Store({
             fields: ['statusCode', 'count'],
             sorters: [{
-                property: 'statusCode',
-                direction: 'ASC'
+                property: 'count',
+                direction: 'DESC'
             }],
             addOrUpdateStatusCode: function (statusCode) {
                 var existingRecord = this.findRecord('statusCode', statusCode);
@@ -118,7 +118,8 @@ Ext.define('fuzzer.FuzzerRunning', {
     _subs: function () {
         this.build();
         this._bar.show();
-        eventBroker.addListener('fuzzer-engine-response-received', this._responsesReceived, this);
+        eventBroker.addListener('status-code-runtime', this._responsesReceived, this);
+        eventBroker.addListener('fuzzer-running-tagging', this._taggingReceived, this);
     },
     _responsesReceived: function (payload) {
         this._statusCodeCounter(payload);
@@ -130,6 +131,86 @@ Ext.define('fuzzer.FuzzerRunning', {
         var statusCodeInt = parseInt(statusCode);
         if (statusCodeInt && !isNaN(statusCodeInt)) {
             this._statusCodeCountStore.addOrUpdateStatusCode(statusCodeInt);
+        }
+    },
+    _buildTaggingStore: function () {
+        this._taggingStore = new Ext.data.Store({
+            fields: ['tag', 'count', 'caseId'],
+            sorters: [{
+                property: 'count',
+                direction: 'DESC'
+            }],
+            addOrUpdateTag: function (tag) {
+                var existingRecord = this.findRecord('tag', tag);
+                if (existingRecord) {
+                    var currentCount = existingRecord.get('count') || 0;
+                    existingRecord.set('count', currentCount + 1);
+                } else {
+                    this.add({
+                        tag: tag,
+                        count: 1
+                    });
+                }
+                this.sort('count', 'DESC');
+            }
+        })
+
+        return this._taggingStore;
+    },
+    _buildTaggingGrid: function () {
+        this._taggingGrid = new Ext.grid.Panel({
+            //title: 'Tagging',
+            id: 'running-tagging-grid',
+            height: 220,
+            border: 0,
+            columns: [{
+                text: 'Tag',
+                dataIndex: 'tag',
+                width: 100,
+                align: 'center',
+                renderer: function (value) {
+                    return `<span style="font-weight: bold;">${value}</span>`;
+                }
+            }, {
+                text: 'Count',
+                dataIndex: 'count',
+                width: 100,
+                align: 'center',
+                renderer: function (value) {
+                    return `<span style="font-weight: bold;">${value}</span>`;
+                }
+            }, {
+                text: 'Percentage',
+                dataIndex: 'percentage',
+                width: 100,
+                align: 'center',
+                renderer: function (value, meta, record) {
+                    var total = 0;
+                    this.store.each(function (record) {
+                        total += record.get('count');
+                    });
+
+                    if (total === 0) return '0%';
+
+                    var percentage = (record.get('count') / total * 100).toFixed(2);
+                    return `<span style="color: #2196F3;">${percentage}%</span>`;
+                }
+            }],
+            store: this._buildTaggingStore(),
+            viewConfig: {
+                stripeRows: true,
+                enableTextSelection: true
+            }
+        });
+
+        return this._taggingGrid;
+    },
+    _taggingReceived: function (data) {
+        this._addTag(data);
+    },
+    _addTag: function (data) {
+        if (data.name) {
+            this._taggingStore.addOrUpdateTag(data.name);
         }
     }
 });
