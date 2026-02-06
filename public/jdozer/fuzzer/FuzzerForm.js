@@ -51,7 +51,6 @@ Ext.define('fuzzer.FuzzerForm', {
                     disabled: true,
                     formBind: true,
                     handler: function () {
-
                         var form = this._form.getForm();
                         if (form.isValid()) {
                             let xForm = this._formData(form);

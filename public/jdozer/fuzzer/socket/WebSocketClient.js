@@ -25,7 +25,7 @@ Ext.define('fuzzer.socket.WebSocketClient', {
         });
 
         this.socket.on('fuzzer.running', (data) => {
-            console.log('📩 Evento de running:', data);
+            //console.log('📩 Evento de running:', data);
             try {
                 this.router.inbound(JSON.parse(data));
             } catch (e) {

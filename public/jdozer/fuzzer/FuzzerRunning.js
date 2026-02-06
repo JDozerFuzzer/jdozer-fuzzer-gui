@@ -7,6 +7,8 @@ Ext.define('fuzzer.FuzzerRunning', {
     },
     listener: function () {
         this._subs();
+        this.build();
+        this._bar.show();
     },
     build: function () {
         this._buildBar();
@@ -27,7 +29,8 @@ Ext.define('fuzzer.FuzzerRunning', {
             x: 1000,
             y: 30,
             //headerPosition: 'left',
-            items: [this._buildStatusCodeCountGrid(), this._buildTaggingGrid()]
+            items: [this._buildStatusCodeCountGrid()],
+            bbar: this._buildProgressBar()
         });
         return this._bar;
     },
@@ -116,13 +119,13 @@ Ext.define('fuzzer.FuzzerRunning', {
         return this._statusCodeCountStore;
     },
     _subs: function () {
-        this.build();
-        this._bar.show();
         eventBroker.addListener('status-code-runtime', this._responsesReceived, this);
+        eventBroker.addListener('fuzzer-started', this._fuzzerStarted, this);
         eventBroker.addListener('fuzzer-running-tagging', this._taggingReceived, this);
     },
     _responsesReceived: function (payload) {
         this._statusCodeCounter(payload);
+        this._progressBarUpdate();
     },
     _statusCodeCounter: function (data) {
         this.addStatusCode(data.statusCode);
@@ -212,6 +215,27 @@ Ext.define('fuzzer.FuzzerRunning', {
         if (data.name) {
             this._taggingStore.addOrUpdateTag(data.name);
         }
+    },
+    _responsesCounter: 0,
+    _buildProgressBar: function (total) {
+        this._progressBar = new Ext.ProgressBar({
+            id: 'running-progress-bar',
+            height: 20,
+            width: 200,
+            border: 0,
+            animate: true,
+            value: 0,
+            text: 'Initializing...',
+            maxValue: total
+        });
+        return this._progressBar;
+    },
+    _progressBarUpdate: function () {
+        this._responsesCounter++;
+        this._progressBar.updateProgress(this._responsesCounter / this._progressBar.maxValue, 'Fuzzing is running...');
+    },
+    _fuzzerStarted: function (data) {
+        this._progressBar.maxValue = data.totalCases;
     }
 });
 
